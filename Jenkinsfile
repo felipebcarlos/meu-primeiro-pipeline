@@ -48,19 +48,17 @@ pipeline {
                     sh '''
                     ssh -o StrictHostKeyChecking=no -i $SSH_KEY_FILE ${env.VM_PROD_USER}@${env.VM_PROD_IP} \'
                         echo "--- (VM 2) Ligado via SSH. A fazer o deploy..." && \
-                        
-                        docker login -u ${env.DOCKERHUB_USER} -p $DOCKER_PASSWORD && \
-
+    
                         echo "--- (VM 2) A parar o container antigo (se existir)..." && \
                         docker stop ${env.APP_NAME} || true && \
                         docker rm ${env.APP_NAME} || true && \
-
-                        echo "--- (VM 2) A puxar a nova imagem do Docker Hub..." && \
+    
+                        echo "--- (VM 2) A puxar a nova imagem do Docker Hub (build ${env.BUILD_NUMBER})..." && \
                         docker pull ${env.DOCKERHUB_USER}/${env.APP_NAME}:${env.BUILD_NUMBER} && \
-
+    
                         echo "--- (VM 2) A iniciar o novo container..." && \
                         docker run -d --name ${env.APP_NAME} -p 3000:3000 ${env.DOCKERHUB_USER}/${env.APP_NAME}:${env.BUILD_NUMBER} && \
-                        
+    
                         echo "--- (VM 2) Deploy concluído!"
                     \'
                     '''
