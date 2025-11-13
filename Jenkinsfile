@@ -3,17 +3,10 @@ pipeline {
 
     environment {
         // --- ❗️❗️❗️ VERIFIQUE ESTA SECÇÃO ❗️❗️❗️ ---
-        // Coloque aqui o seu nome de utilizador do Docker Hub
         DOCKERHUB_USER = 'felipebcarlos'
-        
-        // O nome da sua aplicação/imagem
         APP_NAME = 'meu-primeiro-pipeline'
-        
-        // O IP da sua VM 2 (Produção)
-        VM_PROD_IP = '192.168.15.3' 
-        
-        // O utilizador com que acede via SSH à sua VM 2
-        VM_PROD_USER = 'braga' 
+        VM_PROD_IP = '192.168.15.8' 
+        VM_PROD_USER = 'braga' // Corrigido para 'braga'
         // -------------------------------------
     }
 
@@ -45,7 +38,7 @@ pipeline {
             }
         }
 
-        // --- STAGE DE DEPLOY CORRIGIDO ---
+        // --- STAGE DE DEPLOY CORRIGIDO (AGORA NUMA LINHA) ---
         
         stage('Deploy to Production') {
             steps {
@@ -57,29 +50,10 @@ pipeline {
                     string(credentialsId: 'DOCKERHUB_TOKEN', variable: 'DOCKER_TOKEN_VAR')
                 ]) {
                     
-                    // Script SH agora usa a sintaxe de shell correta (ex: $VM_PROD_USER)
+                    // Todos os comandos remotos estão agora numa única linha,
+                    // encadeados com '&&'. Isto é muito mais seguro para o shell.
                     sh '''
-                    ssh -o StrictHostKeyChecking=no -i $SSH_KEY_FILE $VM_PROD_USER@$VM_PROD_IP \"
-                        echo "--- (VM 2) Ligado via SSH. A fazer o deploy..." && \
-                        
-                        echo "--- (VM 2) A fazer login no Docker Hub..." && \
-                        echo $DOCKER_TOKEN_VAR | docker login -u $DOCKERHUB_USER --password-stdin && \
-
-                        echo "--- (VM 2) A parar o container antigo (se existir)..." && \
-                        docker stop $APP_NAME || true && \
-                        docker rm $APP_NAME || true && \
-
-                        echo "--- (VM 2) A puxar a nova imagem (build $BUILD_NUMBER)..." && \
-                        docker pull $DOCKERHUB_USER/$APP_NAME:$BUILD_NUMBER && \
-
-                        echo "--- (VM 2) A iniciar o novo container..." && \
-                        docker run -d --name $APP_NAME -p 3000:3000 $DOCKERHUB_USER/$APP_NAME:$BUILD_NUMBER && \
-                        
-                        echo "--- (VM 2) A fazer logout do Docker Hub..." && \
-                        docker logout && \
-
-                        echo "--- (VM 2) Deploy concluído!"
-                    \"
+                    ssh -o StrictHostKeyChecking=no -i $SSH_KEY_FILE $VM_PROD_USER@$VM_PROD_IP "echo '--- (VM 2) Ligado via SSH...' && echo '--- (VM 2) A fazer login no Docker Hub...' && echo $DOCKER_TOKEN_VAR | docker login -u $DOCKERHUB_USER --password-stdin && echo '--- (VM 2) A parar container antigo...' && docker stop $APP_NAME || true && docker rm $APP_NAME || true && echo '--- (VM 2) A puxar nova imagem...' && docker pull $DOCKERHUB_USER/$APP_NAME:$BUILD_NUMBER && echo '--- (VM 2) A iniciar novo container...' && docker run -d --name $APP_NAME -p 3000:3000 $DOCKERHUB_USER/$APP_NAME:$BUILD_NUMBER && echo '--- (VM 2) A fazer logout...' && docker logout && echo '--- (VM 2) Deploy concluído!'"
                     '''
                 }
             }
