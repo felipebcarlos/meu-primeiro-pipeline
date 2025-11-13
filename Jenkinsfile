@@ -13,7 +13,7 @@ pipeline {
         VM_PROD_IP = '192.168.15.3' 
         
         // O utilizador com que acede via SSH à sua VM 2
-        VM_PROD_USER = 'ubuntu' 
+        VM_PROD_USER = 'braga' 
         // -------------------------------------
     }
 
