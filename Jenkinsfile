@@ -59,7 +59,7 @@ pipeline {
                     
                     // Script SH agora usa a sintaxe de shell correta (ex: $VM_PROD_USER)
                     sh '''
-                    ssh -o StrictHostKeyChecking=no -i $SSH_KEY_FILE $VM_PROD_USER@$VM_PROD_IP \'
+                    ssh -o StrictHostKeyChecking=no -i $SSH_KEY_FILE $VM_PROD_USER@$VM_PROD_IP \"
                         echo "--- (VM 2) Ligado via SSH. A fazer o deploy..." && \
                         
                         echo "--- (VM 2) A fazer login no Docker Hub..." && \
@@ -79,7 +79,7 @@ pipeline {
                         docker logout && \
 
                         echo "--- (VM 2) Deploy concluído!"
-                    \'
+                    \"
                     '''
                 }
             }
